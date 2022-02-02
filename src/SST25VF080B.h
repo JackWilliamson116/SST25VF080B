@@ -36,7 +36,7 @@ class SST25VF080B {
         /////////////////
         ////Functions////
         /////////////////
-        void read(uint32_t Address, int numbytes);
+        void read(uint32_t Address, uint8_t *bytes, int numbytes);
         void writeEnable();
         void enableWriteSR();
         uint8_t getStatus();
