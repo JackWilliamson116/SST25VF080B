@@ -38,6 +38,7 @@ class SST25VF080B {
         /////////////////
         ////Functions////
         /////////////////
+        void init(SPISettings set);
         void read(uint32_t Address, uint8_t *bytes, int numbytes);
         void writeEnable();
         void enableWriteSR();
