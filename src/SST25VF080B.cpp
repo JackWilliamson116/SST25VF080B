@@ -3,19 +3,24 @@
 /////////////////
 ///Constructor///
 /////////////////
-SST25VF080B::SST25VF080B(int csPin) {
+SST25VF080B::SST25VF080B(uint8_t csPin) {
     CS = csPin;
 }
-
 
 /////////////////
 ////Functions////
 /////////////////
+
+void SST25VF080B::init(SPISettings set){
+
+    SPI.begin();
+    SPI.beginTransaction(set);
+}
+
 void SST25VF080B::read(uint32_t Address, uint8_t *bytes, int numbytes){
 
     digitalWrite(CS,LOW);
     uint8_t byte;
-    //Serial.println(numbytes);
     SPI.transfer(READ);
     SPI.transfer( Address & 0x000000ff);
     SPI.transfer((Address & 0x0000ff00) >> 8);
@@ -70,10 +75,8 @@ void SST25VF080B::writeDisable(){
 void SST25VF080B::writeByte(uint32_t Address, uint8_t value){
 
     writeEnable();
-    uint8_t stat = getStatus();
-    Serial.print("PreWBStatusCheck: ");
-    Serial.println(stat);
-    if(stat != 0x02){
+    status = getStatus();
+    if(status != 0x02){
         Serial.println("Unable To Write Because Invalid Status");
         return;
     }
@@ -84,78 +87,117 @@ void SST25VF080B::writeByte(uint32_t Address, uint8_t value){
     SPI.transfer((Address & 0x00ff0000) >> 16);
     SPI.transfer(value);
     digitalWrite(CS,HIGH);
-    bool isDone = false;
-    while(!isDone){
-        stat = getStatus();
-        if((stat & 0x01) == 0){
-            isDone = true;
+    while(true){
+        status = getStatus();
+        if((status & 0x01) == 0){
+            break;
         }
     }
-    Serial.print("PostWBStatusCheck: ");
-    Serial.println(stat);
+    // Time = 17
 }
 
-void SST25VF080B::writeArray(uint32_t Address, int numbytes, uint8_t *bytes){
+void SST25VF080B::writeArray(uint32_t Address, uint8_t *bytes, int numbytes){
 
+    if(numbytes%2 == 1){
+        Serial.println("Input must be even or else you will lose the last byte");
+        return;
+    }
     writeEnable();
     digitalWrite(CS,LOW);
     SPI.transfer(AAI_WORD_PROGRAM);
-    SPI.transfer(Address);
-    SPI.transfer(Address >> 8);
-    SPI.transfer(Address >>16);
-    for(int i = 0; i<numbytes; i++){
+    SPI.transfer( Address & 0x000000ff);
+    SPI.transfer((Address & 0x0000ff00) >> 8);
+    SPI.transfer((Address & 0x00ff0000) >> 16);
+    SPI.transfer(bytes[0]);
+    for(int i = 1; i<numbytes; i++){
         SPI.transfer(bytes[i]);
-    }
-    digitalWrite(CS,HIGH);
-    bool isDone = false;
-    uint8_t status;
-    while(!isDone){
-        status = getStatus();
-        if((status & 0x01) == 0){
-            isDone = true;
+        if(i%2 == 1 && i+1< numbytes){
+            digitalWrite(CS,HIGH);
+            while(true){
+                status = getStatus();
+                if((status & 0x01) == 0){
+                    break;
+                }
+            }
+            digitalWrite(CS,LOW);
+            SPI.transfer(AAI_WORD_PROGRAM);
         }
     }
+    digitalWrite(CS,HIGH);
+    while(true){
+        status = getStatus();
+        if((status & 0x01) == 0){
+            break;
+        }
+    }
+    writeDisable();
 }
 
 void SST25VF080B::erase4k(uint32_t Address){
 
     writeEnable();
-    Serial.print("statusb4erase: ");
-    Serial.println(getStatus());
     digitalWrite(CS,LOW);
     SPI.transfer(FOUR_KB_SECTOR_ERASE);
     SPI.transfer( Address & 0x000000ff);
     SPI.transfer((Address & 0x0000ff00) >> 8);
     SPI.transfer((Address & 0x00ff0000) >> 16);
     digitalWrite(CS,HIGH);
-    Serial.print("afterErase: ");
-    Serial.println(getStatus());
-    bool isDone = false;
-    uint8_t status;
-    while(!isDone){
+    while(true){
         status = getStatus();
         if((status & 0x01) == 0){
-            isDone = true;
+            break;
         }
+        delayMicroseconds(220);
+    }
+}
+
+void SST25VF080B::erase32k(uint32_t Address){
+
+    writeEnable();
+    digitalWrite(CS,LOW);
+    SPI.transfer(THIRTY_TWO_KB_BLOCK_ERASE);
+    SPI.transfer( Address & 0x000000ff);
+    SPI.transfer((Address & 0x0000ff00) >> 8);
+    SPI.transfer((Address & 0x00ff0000) >> 16);
+    digitalWrite(CS,HIGH);
+    while(true){
+        status = getStatus();
+        if((status & 0x01) == 0){
+            break;
+        }
+        delayMicroseconds(220);
+    }
+}
+
+void SST25VF080B::erase64k(uint32_t Address){
+    
+    writeEnable();
+    digitalWrite(CS,LOW);
+    SPI.transfer(SIXTY_FOUR_KB_BLOCK_ERASE);
+    SPI.transfer( Address & 0x000000ff);
+    SPI.transfer((Address & 0x0000ff00) >> 8);
+    SPI.transfer((Address & 0x00ff0000) >> 16);
+    digitalWrite(CS,HIGH);
+    while(true){
+        status = getStatus();
+        if((status & 0x01) == 0){
+            break;
+        }
+        delayMicroseconds(220);
     }
 }
 
 void SST25VF080B::eraseChip(){
 
     writeEnable();
-    Serial.print("statusb4erase: ");
-    getStatus();
     digitalWrite(CS,LOW);
     SPI.transfer(CHIP_ERASE);
     digitalWrite(CS,HIGH);
-    Serial.print("afterErase: ");
-    getStatus();
-    bool isDone = false;
-    uint8_t status;
-    while(!isDone){
+    while(true){
         status = getStatus();
         if((status & 0x01) == 0){
-            isDone = true;
+            break;
         }
+        delayMicroseconds(500);
     }
 }
