@@ -31,27 +31,49 @@ void setup() {
 
   // Usage example of erasing operations
   //eeprom.eraseChip();
-  //eeprom.erase4k(0xc6);
+  //eeprom.erase4k(0x00);
   //eeprom.erase64k(0xa5);
   //eeprom.writeSR(0x00);
 
-  uint8_t bytes[10] = {'H','i',' ','m','o','m','!','!','!','!'};
+  //uint8_t bytes[10] = {'H','i',' ','m','o','m','!','!','!','!'};
   // Write the array "bytes" to Address 0
   // Remember, it array writes in sets of two so only even arrays
-  eeprom.writeArray(0x00,bytes,sizeof(bytes));
+  //String himom = "Hi mom!!!!";
+  // Write the array "bytes" to Address 0
+  // Remember, it array writes in sets of two so only even arrays
+  /*char* char_ary;
+  char_ary = &himom[0];
+  uint8_t bytes[sizeof(himom)] = {};
+  for(int i = 0; i<sizeof(himom); i++){
+    bytes[i] = himom[i];
+  }*/
+  //unsigned long time = micros();
+  //eeprom.writeByte(0x00000001,'W');
+  //eeprom.writeByte(0x00000004,'A');
+  //eeprom.writeArray(0x00000020,bytes,sizeof(bytes));
+  /*Serial.print("Third Status: ");
+  Serial.println(eeprom.getStatus());*/
+  //time = micros()-time;
+  //Serial.println(time);
 
   //eeprom.writeByte(0x00,'W');
 
   // To read you must pass in an array of bytes of the length that you want to read
-  uint8_t rdbytes[10];
-  eeprom.read(0x00, rdbytes,sizeof(rdbytes));
-
+  uint8_t rdbytes[62000];
+  eeprom.read(0x00,rdbytes,sizeof(rdbytes));
   for(int i=0;i<sizeof(rdbytes);i++){
-    Serial.print("Byte ");
-    Serial.print(i);
-    Serial.print(": ");
-    Serial.println((char)rdbytes[i]);
+      Serial.print((char)rdbytes[i]);
   }
+  /*uint32_t totalbytes = 0;
+  while(totalbytes < 0x100000){
+    uint8_t rdbytes[0xFF];
+    eeprom.read(totalbytes, rdbytes,sizeof(rdbytes));
+    totalbytes = totalbytes + 0x100;
+    for(int i=0;i<sizeof(rdbytes);i++){
+      //Serial.print((char)rdbytes[i]);
+    }
+  }
+  Serial.println(totalbytes);*/
 }
 
 void loop() {

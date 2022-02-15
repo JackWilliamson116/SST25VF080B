@@ -22,9 +22,9 @@ void SST25VF080B::read(uint32_t Address, uint8_t *bytes, int numbytes){
     digitalWrite(CS,LOW);
     uint8_t byte;
     SPI.transfer(READ);
-    SPI.transfer( Address & 0x000000ff);
-    SPI.transfer((Address & 0x0000ff00) >> 8);
     SPI.transfer((Address & 0x00ff0000) >> 16);
+    SPI.transfer((Address & 0x0000ff00) >> 8);
+    SPI.transfer( Address & 0x000000ff);
     for(int i = 0; i<numbytes; i++){
         byte = SPI.transfer(0x01);
         bytes[i] = byte;
@@ -82,9 +82,9 @@ void SST25VF080B::writeByte(uint32_t Address, uint8_t value){
     }
     digitalWrite(CS,LOW);
     SPI.transfer(BYTE_PROGRAM);
-    SPI.transfer( Address & 0x000000ff);
-    SPI.transfer((Address & 0x0000ff00) >> 8);
     SPI.transfer((Address & 0x00ff0000) >> 16);
+    SPI.transfer((Address & 0x0000ff00) >> 8);
+    SPI.transfer( Address & 0x000000ff);
     SPI.transfer(value);
     digitalWrite(CS,HIGH);
     while(true){
@@ -105,9 +105,9 @@ void SST25VF080B::writeArray(uint32_t Address, uint8_t *bytes, int numbytes){
     writeEnable();
     digitalWrite(CS,LOW);
     SPI.transfer(AAI_WORD_PROGRAM);
-    SPI.transfer( Address & 0x000000ff);
-    SPI.transfer((Address & 0x0000ff00) >> 8);
     SPI.transfer((Address & 0x00ff0000) >> 16);
+    SPI.transfer((Address & 0x0000ff00) >> 8);
+    SPI.transfer( Address & 0x000000ff);
     SPI.transfer(bytes[0]);
     for(int i = 1; i<numbytes; i++){
         SPI.transfer(bytes[i]);
@@ -138,9 +138,9 @@ void SST25VF080B::erase4k(uint32_t Address){
     writeEnable();
     digitalWrite(CS,LOW);
     SPI.transfer(FOUR_KB_SECTOR_ERASE);
-    SPI.transfer( Address & 0x000000ff);
-    SPI.transfer((Address & 0x0000ff00) >> 8);
     SPI.transfer((Address & 0x00ff0000) >> 16);
+    SPI.transfer((Address & 0x0000ff00) >> 8);
+    SPI.transfer( Address & 0x000000ff);
     digitalWrite(CS,HIGH);
     while(true){
         status = getStatus();
@@ -156,9 +156,9 @@ void SST25VF080B::erase32k(uint32_t Address){
     writeEnable();
     digitalWrite(CS,LOW);
     SPI.transfer(THIRTY_TWO_KB_BLOCK_ERASE);
-    SPI.transfer( Address & 0x000000ff);
-    SPI.transfer((Address & 0x0000ff00) >> 8);
     SPI.transfer((Address & 0x00ff0000) >> 16);
+    SPI.transfer((Address & 0x0000ff00) >> 8);
+    SPI.transfer( Address & 0x000000ff);
     digitalWrite(CS,HIGH);
     while(true){
         status = getStatus();
@@ -174,9 +174,9 @@ void SST25VF080B::erase64k(uint32_t Address){
     writeEnable();
     digitalWrite(CS,LOW);
     SPI.transfer(SIXTY_FOUR_KB_BLOCK_ERASE);
-    SPI.transfer( Address & 0x000000ff);
-    SPI.transfer((Address & 0x0000ff00) >> 8);
     SPI.transfer((Address & 0x00ff0000) >> 16);
+    SPI.transfer((Address & 0x0000ff00) >> 8);
+    SPI.transfer( Address & 0x000000ff);
     digitalWrite(CS,HIGH);
     while(true){
         status = getStatus();
